@@ -1,8 +1,7 @@
 import { Link } from "react-router-dom";
 import { Star, Package, TrendingUp } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/atoms/badge";
+import { Card, CardContent } from "@/components/atoms/card";
 import type { Produto } from "@/types/produto";
 
 interface CartaoProdutoProps {

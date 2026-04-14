@@ -23,6 +23,7 @@ interface ContextoProdutoType {
   atualizarProduto: (id: string, dados: ProdutoFormulario) => Promise<void>;
   buscarProdutoPorId: (id: string) => Produto | undefined;
   obterDetalhesProduto: (id: string) => Promise<ProdutoDetalhes | null>; 
+  carregarMaisProdutos: (pagina: number) => Promise<void>;
 }
 
 export const ContextoProduto = createContext<ContextoProdutoType | undefined>(undefined);
@@ -51,6 +52,16 @@ export const ProvedorProduto: React.FC<{ children: React.ReactNode }> = ({ child
   useEffect(() => {
     listarProdutos();
   }, [listarProdutos]);
+
+  const carregarMaisProdutos = async (pagina: number) => {
+    const skip = (pagina - 1) * 50;
+    try {
+      const resposta = await api.get(`/produtos/?limit=50&skip=${skip}`);
+      setProdutos((prev) => [...prev, ...resposta.data]);
+    } catch {
+      toast({ title: "Erro", description: "Não foi possível carregar mais produtos.", variant: "destructive" });
+    }
+  };
 
   const adicionarProduto = async (dados: ProdutoFormulario) => {
     try {
@@ -102,7 +113,8 @@ export const ProvedorProduto: React.FC<{ children: React.ReactNode }> = ({ child
       deletarProduto, 
       atualizarProduto, 
       buscarProdutoPorId,
-      obterDetalhesProduto 
+      obterDetalhesProduto,
+      carregarMaisProdutos
     }}>
       {children}
     </ContextoProduto.Provider>

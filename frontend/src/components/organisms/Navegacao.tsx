@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Package, Settings, Plus, ShoppingBag } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/atoms/button";
 
 export const Navegacao = () => {
   const local = useLocation();

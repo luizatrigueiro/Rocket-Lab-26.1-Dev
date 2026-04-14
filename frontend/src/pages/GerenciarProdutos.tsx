@@ -1,7 +1,7 @@
 import { useProdutos } from "@/contexts/ContextoProduto";
-import { Button } from "@/components/ui/button";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/atoms/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/atoms/table";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/card";
 import { Trash2, Package, Edit, Eye } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
@@ -15,7 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@/components/atoms/alert-dialog";
 
 const GerenciarProdutos = () => {
   const { produtos, deletarProduto, carregando } = useProdutos();

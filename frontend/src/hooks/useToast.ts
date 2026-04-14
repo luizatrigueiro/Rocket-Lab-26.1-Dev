@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { ToastActionElement, ToastProps } from "@/components/ui/toast";
+import type { ToastActionElement, ToastProps } from "@/components/atoms/toast";
 
 const LIMITE_TOAST = 1;
 const ATRASO_REMOCAO_TOAST = 5000;

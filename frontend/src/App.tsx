@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProvedorProduto } from "@/contexts/ContextoProduto";
-import { Toaster } from "@/components/ui/toaster";
-import { Navegacao } from "@/components/Navegacao"; 
+import { Toaster } from "@/components/atoms/toaster";
+import { Navegacao } from "@/components/organisms/Navegacao"; 
 import Inicio from "./pages/Inicio";
 import FormularioProduto from "./pages/FormularioProduto";
 import GerenciarProdutos from "./pages/GerenciarProdutos";

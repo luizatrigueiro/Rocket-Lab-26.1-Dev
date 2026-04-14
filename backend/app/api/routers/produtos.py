@@ -8,6 +8,8 @@ from app.database import get_db
 from app.models.produto import Produto
 from app.models.item_pedido import ItemPedido
 from app.models.avaliacao_pedido import AvaliacaoPedido
+from app.models.pedido import Pedido
+from app.models.vendedor import Vendedor
 from app.schemas.produto import ProdutoCreate, ProdutoResponse, ProdutoUpdate, ProdutoDetalhesResponse
 
 router = APIRouter(
@@ -21,6 +23,9 @@ def listar_produtos(
     limit: int = 50, 
     skip: int = 0, 
     busca: Optional[str] = None, 
+    categoria: Optional[str] = None,
+    min_estrelas: Optional[float] = None,
+    preco_max: Optional[float] = None,
     db: Session = Depends(get_db)
 ):
     preco_medio_query = (
@@ -61,6 +66,12 @@ def listar_produtos(
     
     if busca:
         consulta = consulta.filter(Produto.nome_produto.ilike(f"%{busca}%"))
+    if categoria:
+        consulta = consulta.filter(Produto.categoria_produto == categoria)
+    if min_estrelas is not None:
+        consulta = consulta.filter(media_avaliacoes_query.c.media_avaliacoes >= min_estrelas)
+    if preco_max is not None:
+        consulta = consulta.filter(preco_medio_query.c.preco_brl <= preco_max)
         
     # Executa a busca aplicando o limite da paginação
     produtos = consulta.offset(skip).limit(limit).all()
@@ -77,6 +88,21 @@ def obter_produto_detalhes(id_produto: str, db: Session = Depends(get_db)):
     preco_medio = db.query(func.avg(ItemPedido.preco_BRL)).filter(ItemPedido.id_produto == id_produto).scalar()
     
     total_vendas = db.query(ItemPedido).filter(ItemPedido.id_produto == id_produto).count()
+    
+    frete_medio = db.query(func.avg(ItemPedido.preco_frete)).filter(ItemPedido.id_produto == id_produto).scalar()
+    
+    tempo_medio = db.query(func.avg(Pedido.tempo_entrega_dias))\
+        .join(ItemPedido, Pedido.id_pedido == ItemPedido.id_pedido)\
+        .filter(ItemPedido.id_produto == id_produto).scalar()
+
+    top_vendedor = db.query(Vendedor.estado, func.count(ItemPedido.id_pedido).label('qtd'))\
+        .join(ItemPedido, Vendedor.id_vendedor == ItemPedido.id_vendedor)\
+        .filter(ItemPedido.id_produto == id_produto)\
+        .group_by(Vendedor.estado)\
+        .order_by(func.count(ItemPedido.id_pedido).desc())\
+        .first()
+
+    estado_vendedor = top_vendedor.estado if top_vendedor else "N/A"
     
     avaliacoes_consulta = (
         db.query(AvaliacaoPedido)
@@ -101,6 +127,9 @@ def obter_produto_detalhes(id_produto: str, db: Session = Depends(get_db)):
     return {
         **produto.__dict__,
         "preco_brl": preco_medio or 0.0,
+        "frete_medio": frete_medio or 0.0,
+        "tempo_medio_entrega": tempo_medio or 0.0,
+        "estado_principal_vendedor": estado_vendedor,
         "total_vendas": total_vendas,
         "media_avaliacoes": round(media, 1),
         "avaliacoes": lista_avaliacoes

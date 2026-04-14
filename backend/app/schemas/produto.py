@@ -46,6 +46,9 @@ class ProdutoResponse(ProdutoBase):
 # 4. Schema da Tela de Detalhes 
 class ProdutoDetalhesResponse(ProdutoResponse):
     total_vendas: int = 0
+    frete_medio: float = 0.0
+    tempo_medio_entrega: float = 0.0 
+    estado_principal_vendedor: str = "N/A"
     avaliacoes: List[AvaliacaoSchema] = []
 
     class Config:

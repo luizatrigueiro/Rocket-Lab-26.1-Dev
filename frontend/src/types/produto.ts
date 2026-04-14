@@ -21,5 +21,8 @@ export interface Avaliacao {
 export interface ProdutoDetalhes extends Produto {
   total_vendas: number;
   media_avaliacoes: number;
+  frete_medio?: number;
+  tempo_medio_entrega?: number; 
+  estado_principal_vendedor?: string;
   avaliacoes: Avaliacao[];
 }

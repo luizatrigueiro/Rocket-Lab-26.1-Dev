@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useProdutos } from "@/contexts/ContextoProduto";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Edit, Trash2, Package, Ruler, Star, MessageSquare } from "lucide-react";
+import { Button } from "@/components/atoms/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/atoms/card";
+import { Badge } from "@/components/atoms/badge";
+import { ArrowLeft, Edit, Trash2, Package, Ruler, Star, MessageSquare, TrendingUp } from "lucide-react";
 
 import {
   AlertDialog,
@@ -16,7 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from "@/components/atoms/alert-dialog";
 
 import type { ProdutoDetalhes } from "@/types/produto";
 
@@ -100,6 +100,19 @@ const DetalhesProduto = () => {
             <span className="text-slate-400 text-sm">({detalhes.avaliacoes?.length || 0} avaliações)</span>
           </div>
 
+          <div className="mb-6">
+            {detalhes.preco_brl && detalhes.preco_brl > 0 ? (
+              <div className="flex items-end gap-2">
+                <span className="text-4xl font-black text-emerald-600">
+                  {new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(detalhes.preco_brl)}
+                </span>
+                <span className="text-sm text-slate-500 mb-1">preço médio histórico</span>
+              </div>
+            ) : (
+              <span className="text-xl font-bold text-slate-500">Preço sob consulta</span>
+            )}
+          </div>
+
           <div className="flex gap-4">
             <Button className="gap-2 bg-indigo-600 hover:bg-indigo-700" onClick={() => navigate(`/produtos/novo?id=${detalhes.id_produto}`)}>
               <Edit size={16} /> Editar
@@ -162,6 +175,32 @@ const DetalhesProduto = () => {
                  <p className="text-xs text-slate-400 mb-1">Vendas Totais</p>
                  <p className="text-2xl font-black text-indigo-600">{detalhes.total_vendas} un.</p>
                </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="shadow-sm border-slate-200">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-bold text-slate-500 uppercase flex items-center gap-2">
+              <TrendingUp size={16} /> Logística
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-slate-50 p-3 rounded-lg flex justify-between items-center">
+              <span className="text-xs text-slate-500">Estado do Vendedor:</span>
+              <Badge variant="outline" className="bg-white">{detalhes.estado_principal_vendedor || "N/A"}</Badge>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-lg flex justify-between items-center">
+              <span className="text-xs text-slate-500">Entrega Média:</span>
+              <span className="font-bold text-slate-700">{detalhes.tempo_medio_entrega ? detalhes.tempo_medio_entrega.toFixed(0) + " dias" : "N/A"}</span>
+            </div>
+            <div className="bg-slate-50 p-3 rounded-lg flex justify-between items-center">
+              <span className="text-xs text-slate-500">Custo de Frete:</span>
+              <span className="font-bold text-emerald-600">
+                {detalhes.frete_medio && detalhes.frete_medio > 0 
+                  ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(detalhes.frete_medio)
+                  : "Grátis / Não medido"}
+              </span>
             </div>
           </CardContent>
         </Card>
