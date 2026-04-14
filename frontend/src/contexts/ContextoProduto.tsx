@@ -1,9 +1,10 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { useState, useEffect, useCallback, createContext, useContext } from "react";
-import type { Produto } from "@/types/produto";
+import type { Produto, ProdutoDetalhes } from "@/types/produto"; 
 import { api } from "@/services/api";
 import { useToast } from "@/hooks/useToast";
 
+// Interface para o formulário base 
 interface ProdutoFormulario {
   nome_produto: string;
   categoria_produto: string;
@@ -11,17 +12,20 @@ interface ProdutoFormulario {
   comprimento_centimetros: number;
   altura_centimetros: number;
   largura_centimetros: number;
+  imagem_url?: string
 }
 
-interface ContextoProdutoTipo {
+interface ContextoProdutoType {
   produtos: Produto[];
   carregando: boolean;
   adicionarProduto: (dados: ProdutoFormulario) => Promise<void>;
   deletarProduto: (id: string) => Promise<void>;
+  atualizarProduto: (id: string, dados: ProdutoFormulario) => Promise<void>;
   buscarProdutoPorId: (id: string) => Produto | undefined;
+  obterDetalhesProduto: (id: string) => Promise<ProdutoDetalhes | null>; 
 }
 
-export const ContextoProduto = createContext<ContextoProdutoTipo | undefined>(undefined);
+export const ContextoProduto = createContext<ContextoProdutoType | undefined>(undefined);
 
 export const ProvedorProduto: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [produtos, setProdutos] = useState<Produto[]>([]);
@@ -36,7 +40,7 @@ export const ProvedorProduto: React.FC<{ children: React.ReactNode }> = ({ child
     } catch {
       toast({ 
         title: "Erro de Conexão", 
-        description: "Não foi possível carregar os produtos.",
+        description: "Não foi possível carregar os produtos do banco.",
         variant: "destructive" 
       });
     } finally {
@@ -52,9 +56,19 @@ export const ProvedorProduto: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       await api.post("/produtos/", dados);
       await listarProdutos();
-      toast({ title: "Sucesso", description: "Produto cadastrado!" });
+      toast({ title: "Sucesso", description: "Produto cadastrado com sucesso!" });
     } catch {
       toast({ title: "Erro", description: "Falha ao salvar produto.", variant: "destructive" });
+    }
+  };
+
+  const atualizarProduto = async (id: string, dados: ProdutoFormulario) => {
+    try {
+      await api.put(`/produtos/${id}`, dados);
+      await listarProdutos();
+      toast({ title: "Sucesso", description: "Produto atualizado com sucesso!" });
+    } catch {
+      toast({ title: "Erro", description: "Falha ao atualizar produto.", variant: "destructive" });
     }
   };
 
@@ -62,16 +76,34 @@ export const ProvedorProduto: React.FC<{ children: React.ReactNode }> = ({ child
     try {
       await api.delete(`/produtos/${id}`);
       setProdutos((prev) => prev.filter((p) => p.id_produto !== id));
-      toast({ title: "Removido", description: "Produto excluído." });
+      toast({ title: "Removido", description: "Produto excluído do sistema." });
     } catch {
-      toast({ title: "Erro", description: "Falha ao remover.", variant: "destructive" });
+      toast({ title: "Erro", description: "Falha ao remover produto.", variant: "destructive" });
     }
   };
 
   const buscarProdutoPorId = (id: string) => produtos.find((p) => p.id_produto === id);
 
+  const obterDetalhesProduto = async (id: string) => {
+    try {
+      const resposta = await api.get(`/produtos/${id}/detalhes`);
+      return resposta.data; 
+    } catch {
+      toast({ title: "Erro", description: "Não foi possível carregar os detalhes e avaliações do produto.", variant: "destructive" });
+      return null;
+    }
+  };
+
   return (
-    <ContextoProduto.Provider value={{ produtos, carregando, adicionarProduto, deletarProduto, buscarProdutoPorId }}>
+    <ContextoProduto.Provider value={{ 
+      produtos, 
+      carregando, 
+      adicionarProduto, 
+      deletarProduto, 
+      atualizarProduto, 
+      buscarProdutoPorId,
+      obterDetalhesProduto 
+    }}>
       {children}
     </ContextoProduto.Provider>
   );

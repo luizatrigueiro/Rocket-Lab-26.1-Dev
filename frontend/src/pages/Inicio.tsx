@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useProdutos } from "@/contexts/ContextoProduto";
-import { CartaoProduto } from "@/components/CartaoProduto";
+import CartaoProduto from "@/components/CartaoProduto";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Search, LayoutGrid, PackageSearch } from "lucide-react";

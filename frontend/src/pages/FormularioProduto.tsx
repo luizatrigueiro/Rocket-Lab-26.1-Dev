@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProdutos } from "@/contexts/ContextoProduto";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,21 +9,48 @@ import { ArrowLeft, Save } from "lucide-react";
 
 const FormularioProduto = () => {
   const navigate = useNavigate();
-  const { adicionarProduto } = useProdutos();
+  const [searchParams] = useSearchParams();
+  const idEdicao = searchParams.get("id"); 
+  
+  const { adicionarProduto, atualizarProduto, buscarProdutoPorId } = useProdutos();
+
+  const produtoExistente = idEdicao ? buscarProdutoPorId(idEdicao) : undefined;
 
   const [form, setForm] = useState({
-    nome_produto: "",
-    categoria_produto: "",
-    peso_produto_gramas: 0,
-    comprimento_centimetros: 0,
-    altura_centimetros: 0,
-    largura_centimetros: 0,
+    nome_produto: produtoExistente?.nome_produto || "",
+    categoria_produto: produtoExistente?.categoria_produto || "",
+    peso_produto_gramas: produtoExistente?.peso_produto_gramas || 0,
+    comprimento_centimetros: produtoExistente?.comprimento_centimetros || 0,
+    altura_centimetros: produtoExistente?.altura_centimetros || 0,
+    largura_centimetros: produtoExistente?.largura_centimetros || 0,
+    imagem_url: produtoExistente?.imagem_url || "", // <-- Adicionado aqui!
   });
+
+  useEffect(() => {
+    if (produtoExistente) {
+      Promise.resolve().then(() => {
+        setForm({
+          nome_produto: produtoExistente.nome_produto,
+          categoria_produto: produtoExistente.categoria_produto,
+          peso_produto_gramas: produtoExistente.peso_produto_gramas,
+          comprimento_centimetros: produtoExistente.comprimento_centimetros,
+          altura_centimetros: produtoExistente.altura_centimetros,
+          largura_centimetros: produtoExistente.largura_centimetros,
+          imagem_url: produtoExistente.imagem_url || "", // <-- Adicionado aqui!
+        });
+      });
+    }
+  }, [produtoExistente]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await adicionarProduto(form);
-    // Após salvar, volta para a tela de gerenciamento
+    
+    if (idEdicao) {
+      await atualizarProduto(idEdicao, form);
+    } else {
+      await adicionarProduto(form);
+    }
+    
     navigate("/produtos/gerenciar");
   };
 
@@ -32,15 +59,17 @@ const FormularioProduto = () => {
       <Button 
         variant="ghost" 
         className="mb-6 gap-2 hover:bg-secondary" 
-        onClick={() => navigate("/produtos/gerenciar")}
+        onClick={() => navigate(-1)} 
       >
-        <ArrowLeft size={16} /> Voltar para Gerenciamento
+        <ArrowLeft size={16} /> Voltar
       </Button>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Cadastrar Novo Produto</CardTitle>
+            <CardTitle className="text-2xl">
+              {idEdicao ? "Editar Produto" : "Cadastrar Novo Produto"}
+            </CardTitle>
           </CardHeader>
           <CardContent className="grid gap-6">
             {/* Informações Principais */}
@@ -65,6 +94,19 @@ const FormularioProduto = () => {
                   required 
                 />
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="imagem_url">URL da Imagem (Foto do Produto)</Label>
+                <Input
+                  id="imagem_url"
+                  name="imagem_url"
+                  placeholder="https://exemplo.com/foto-do-produto.jpg"
+                  value={form.imagem_url || ""}
+                  onChange={(e) => setForm({...form, imagem_url: e.target.value})}
+                  className="border-slate-200 focus-visible:ring-indigo-500"
+                />
+                <p className="text-xs text-slate-500">Cole o link direto para a imagem do produto. Deixe em branco para usar o ícone padrão.</p>
+              </div>              
             </div>
 
             {/* Logística e Dimensões */}
@@ -75,6 +117,7 @@ const FormularioProduto = () => {
                   id="peso"
                   type="number" 
                   placeholder="0"
+                  value={form.peso_produto_gramas || ""} 
                   onChange={(e) => setForm({...form, peso_produto_gramas: Number(e.target.value)})} 
                   required
                 />
@@ -85,6 +128,7 @@ const FormularioProduto = () => {
                   id="altura"
                   type="number" 
                   placeholder="0"
+                  value={form.altura_centimetros || ""} 
                   onChange={(e) => setForm({...form, altura_centimetros: Number(e.target.value)})} 
                   required
                 />
@@ -95,6 +139,7 @@ const FormularioProduto = () => {
                   id="largura"
                   type="number" 
                   placeholder="0"
+                  value={form.largura_centimetros || ""} 
                   onChange={(e) => setForm({...form, largura_centimetros: Number(e.target.value)})} 
                   required
                 />
@@ -105,6 +150,7 @@ const FormularioProduto = () => {
                   id="comprimento"
                   type="number" 
                   placeholder="0"
+                  value={form.comprimento_centimetros || ""} 
                   onChange={(e) => setForm({...form, comprimento_centimetros: Number(e.target.value)})} 
                   required
                 />
@@ -113,8 +159,9 @@ const FormularioProduto = () => {
           </CardContent>
         </Card>
 
-        <Button type="submit" className="w-full gap-2 text-lg h-12">
-          <Save size={20} /> Salvar Produto no Banco
+        <Button type="submit" className="w-full gap-2 text-lg h-12 bg-indigo-600 hover:bg-indigo-700">
+          <Save size={20} /> 
+          {idEdicao ? "Salvar Alterações" : "Salvar Produto no Banco"}
         </Button>
       </form>
     </div>

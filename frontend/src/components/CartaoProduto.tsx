@@ -1,59 +1,82 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Link } from "react-router-dom";
+import { Star, Package, TrendingUp } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Star, Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import type { Produto } from "@/types/produto";
 
 interface CartaoProdutoProps {
   produto: Produto;
 }
 
-export const CartaoProduto = ({ produto }: CartaoProdutoProps) => {
-  return (
-    <Card className="group overflow-hidden border-none shadow-md hover:shadow-xl transition-all duration-300 bg-white">
-      {/* Área da Imagem (Placeholder) */}
-      <div className="aspect-square bg-slate-100 relative flex items-center justify-center overflow-hidden">
-        <div className="absolute top-3 left-3 flex gap-2">
-          <Badge className="bg-emerald-500 hover:bg-emerald-600 border-none">Ativo</Badge>
-        </div>
-        
-        {/* Ícone de placeholder que aumenta no hover */}
-        <Package className="w-16 h-16 text-slate-300 group-hover:scale-110 transition-transform duration-500" />
-        
-        {/* Badge de Destaque (Fictício para o visual) */}
-        <div className="absolute top-3 right-3">
-          <Badge variant="outline" className="bg-amber-50 text-amber-600 border-amber-200">
-            ⭐ Destaque
-          </Badge>
-        </div>
-      </div>
+const CartaoProduto = ({ produto }: CartaoProdutoProps) => {
+  const precoFormatado = produto.preco_brl && produto.preco_brl > 0
+    ? new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(produto.preco_brl)
+    : "Consulte o preço";
 
-      <CardContent className="p-4 space-y-1">
-        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-          {produto.categoria_produto}
-        </p>
-        <h3 className="font-semibold text-slate-800 line-clamp-1 group-hover:text-primary transition-colors">
-          {produto.nome_produto}
-        </h3>
+  return (
+    <Card className="group overflow-hidden border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 flex flex-col h-full animate-in fade-in zoom-in duration-500 relative">
+      
+      <Link to={`/produtos/${produto.id_produto}`} className="flex flex-col flex-grow text-inherit no-underline">
         
-        <div className="flex flex-col gap-1 pt-2">
-          {/* Preço Fictício para compor o visual da foto */}
-          <span className="text-lg font-bold text-slate-900">R$ 279,90</span>
-          
-          {/* Estrelinhas de Avaliação */}
-          <div className="flex items-center gap-1">
-            <div className="flex text-amber-400">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} size={12} fill={i < 4 ? "currentColor" : "none"} className={i < 4 ? "" : "text-slate-300"} />
-              ))}
-            </div>
-            <span className="text-[10px] text-slate-400">(12 vendas)</span>
+        {/* Imagem */}
+        <div className="aspect-square bg-white relative overflow-hidden flex items-center justify-center border-b border-slate-100">
+          {produto.imagem_url ? (
+            <img
+              src={produto.imagem_url}
+              alt={produto.nome_produto}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              onError={(e) => {
+                // Fallback para caso o link da imagem quebre
+                (e.target as HTMLImageElement).style.display = 'none';
+                (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          ) : null}
+          <div className={`flex items-center justify-center w-full h-full bg-slate-50 text-slate-300 ${produto.imagem_url ? 'hidden' : ''}`}>
+            <Package size={64} strokeWidth={1.5} />
           </div>
         </div>
-      </CardContent>
 
-      <CardFooter className="p-4 pt-0">
-        <div className="w-full h-[1px] bg-slate-100" />
-      </CardFooter>
+        <CardContent className="p-5 flex-grow flex flex-col">
+          {/* Categoria */}
+          <Badge className="w-fit bg-slate-100 text-slate-600 hover:bg-slate-200 border-none mb-3 text-[10px] uppercase tracking-wider font-semibold">
+            {produto.categoria_produto.replace('_', ' ')}
+          </Badge>
+
+          {/* Título */}
+          <h3 className="font-bold text-slate-800 text-lg leading-tight mb-2 line-clamp-2" title={produto.nome_produto}>
+            {produto.nome_produto}
+          </h3>
+
+          {/* Avaliações */}
+          <div className="flex items-center gap-1.5 mt-auto mb-4">
+            <div className="flex text-amber-400">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  size={14}
+                  fill={i < Math.round(produto.media_avaliacoes || 0) ? "currentColor" : "none"}
+                  className={i < Math.round(produto.media_avaliacoes || 0) ? "" : "text-slate-300"}
+                />
+              ))}
+            </div>
+            <span className="text-xs font-semibold text-slate-500">
+              {produto.media_avaliacoes ? produto.media_avaliacoes.toFixed(1) : "0.0"}
+            </span>
+          </div>
+
+          {/* Preço (Média de Vendas) */}
+          <div className="flex items-center gap-2 bg-slate-50 p-2 rounded-md">
+            <TrendingUp size={16} className={produto.preco_brl && produto.preco_brl > 0 ? "text-emerald-500" : "text-slate-400"} />
+            <span className={`font-black ${produto.preco_brl && produto.preco_brl > 0 ? 'text-xl text-slate-900' : 'text-sm text-slate-500'}`}>
+              {precoFormatado}
+            </span>
+          </div>
+        </CardContent>
+      </Link>
     </Card>
   );
 };
+
+export default CartaoProduto;

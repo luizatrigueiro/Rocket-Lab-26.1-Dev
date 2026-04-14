@@ -21,10 +21,6 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
-@app.get("/")
-def read_root():
-    return {"status": "ok", "message": "API rodando com sucesso!"}
-
 @app.get("/", tags=["Health"])
 def health_check():
     return {"status": "ok", "message": "API rodando com sucesso!"}

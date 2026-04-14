@@ -1,4 +1,4 @@
-export type Produto = {
+export interface Produto {
   id_produto: string;
   nome_produto: string;
   categoria_produto: string;
@@ -6,6 +6,20 @@ export type Produto = {
   comprimento_centimetros: number;
   altura_centimetros: number;
   largura_centimetros: number;
-};
+  media_avaliacoes?: number; 
+  imagem_url?: string; 
+  preco_brl?: number;
+}
 
-export type ProductFormData = Omit<Produto, 'id_produto'>;
+export interface Avaliacao {
+  nota: number;
+  titulo: string;
+  comentario: string;
+  data: string;
+}
+
+export interface ProdutoDetalhes extends Produto {
+  total_vendas: number;
+  media_avaliacoes: number;
+  avaliacoes: Avaliacao[];
+}
