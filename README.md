@@ -1,4 +1,6 @@
-# 🛒 Sistema de Gerenciamento de E-Commerce
+# 🚀 Visagio | Rocket Lab 2026 - Desafio de Desenvolvimento
+
+## 🛒 Sistema de Gerenciamento de E-Commerce
 
 Desenvolvimento de um módulo gerencial de E-commerce full-stack. Este sistema permite que gerentes de loja visualizem seu catálogo de produtos, acompanhem o desempenho de vendas, leiam avaliações de clientes e analisem métricas logísticas, além de realizar a gestão completa (CRUD) do inventário.
 
